@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>HealthHub(Prototype)</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg1:#071023; --bg2:#041226; --card:#0f1724; --muted:#9aa7c7;
+  --g1:linear-gradient(135deg,#7c5cff,#22d3ee);
+  --g2:linear-gradient(135deg,#22d3ee,#7c5cff);
+  --g3:linear-gradient(135deg,#ff7ab6,#ffb86b);
+  --glass:rgba(255,255,255,0.04);
+  --accent:#7c5cff; --ok:#00ffa7;
+  --radius:16px;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:'Poppins',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; background:linear-gradient(180deg,#071023 0%, #041226 100%); color:#eef1ff}
+.app{width:390px;max-width:94vw;margin:20px auto;border-radius:24px;overflow:hidden;box-shadow:0 30px 80px rgba(3,6,20,.7);background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01))}
+.header{padding:14px 16px;display:flex;align-items:center;gap:12px}
+.logo{width:46px;height:46px;border-radius:12px;background:var(--g1);display:flex;align-items:center;justify-content:center;font-weight:800;color:#071025}
+.title{font-weight:800;font-size:1.06rem}
+.container{padding:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card{background:var(--card);border-radius:14px;padding:12px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 10px 30px rgba(3,6,20,.6);cursor:pointer;transition:transform .16s ease, box-shadow .16s ease}
+.card:hover{transform:translateY(-6px);box-shadow:0 18px 38px rgba(124,92,255,.14)}
+.stat-number{font-weight:800;font-size:1.06rem}
+.stat-label{color:var(--muted);font-size:12px}
+.progress-ring{width:88px;height:88px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#7c5cff var(--p,0%), rgba(255,255,255,0.03) 0%);border:6px solid rgba(255,255,255,0.02)}
+.section-title{font-weight:700;margin:12px 6px 8px}
+.bottom-nav{display:flex;gap:6px;padding:10px;background:linear-gradient(180deg,rgba(0,0,0,0.06),transparent);justify-content:space-around}
+.nav-item{flex:1;text-align:center;padding:8px 6px;border-radius:10px;color:var(--muted);font-size:0.9rem;cursor:pointer}
+.nav-item.active{color:#071025;background:linear-gradient(90deg,#7c5cff,#22d3ee);box-shadow:0 8px 22px rgba(124,92,255,.18)}
+.screen{display:none;padding:12px}
+.screen.active{display:block}
+.emoji-row{display:flex;gap:8px}
+.emoji{width:56px;height:56px;border-radius:12px;display:grid;place-items:center;font-size:26px;background:rgba(255,255,255,0.02);cursor:pointer;border:2px solid transparent}
+.emoji.selected{transform:translateY(-6px);border-color:rgba(255,255,255,0.06);box-shadow:0 10px 30px rgba(124,92,255,.12)}
+.week-graph{margin-top:12px;height:80px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);border-radius:10px;padding:8px;display:flex;align-items:flex-end;gap:6px}
+.bar{flex:1;border-radius:6px;background:linear-gradient(180deg,#ff7ab6,#ffb86b);height:40%}
+.sleep-row{display:flex;gap:10px;align-items:center}
+.circular{width:86px;height:86px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#22d3ee var(--s,0%), rgba(255,255,255,0.03) 0%);border:6px solid rgba(255,255,255,0.02)}
+.slider{width:100%}
+textarea{width:100%;min-height:110px;background:rgba(255,255,255,0.02);border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,0.03);color:var(--txt);resize:none}
+.quote{background:linear-gradient(90deg,#22d3ee,#7c5cff);padding:10px;border-radius:10px;color:#071025;font-weight:700}
+.post{background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);padding:10px;border-radius:10px;margin-bottom:8px}
+.badge{display:inline-grid;place-items:center;padding:10px;border-radius:12px;background:linear-gradient(90deg,#ffb86b,#ff7ab6);color:#071025;font-weight:700;margin-right:8px}
+.small-muted{color:var(--muted);font-size:12px}
+.center{display:flex;align-items:center;justify-content:center}
+.modal-back{position:fixed;inset:0;background:rgba(2,6,20,.7);display:none;align-items:center;justify-content:center;z-index:999}
+.modal{width:92%;max-width:420px;background:linear-gradient(180deg,#0b1120,#071021);border-radius:16px;padding:16px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 30px 60px rgba(0,0,0,.6)}
+.btn{padding:10px 12px;border-radius:12px;border:none;background:linear-gradient(90deg,#7c5cff,#22d3ee);color:#071025;font-weight:700;cursor:pointer}
+.btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+.small{font-size:12px;margin-top:8px;color:var(--muted)}
+.header-right{margin-left:auto;text-align:right}
+.top-row{display:flex;gap:10px;align-items:center}
+.badge-chip{padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.03);font-weight:700;color:var(--muted);font-size:12px}
+.download-hint{font-size:11px;color:var(--muted); margin-top:8px}
+</style>
+</head>
+<body>
+<div class="app" role="application" aria-label="HealthHub Prototype">
+  <div class="header">
+    <div class="logo">HB</div>
+    <div>
+      <div class="title">HealthHub</div>
+      <div class="small-muted">Prototype</div>
+    </div>
+    <div class="header-right">
+      <div class="badge-chip">Level 7 • 1240 pts</div>
+    </div>
+  </div>
+
+  <!-- HOME SCREEN -->
+  <div id="home" class="screen active">
+    <div class="container">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <div class="card" id="cardSteps" title="Open Steps">
+          <div class="small-muted">Steps</div>
+          <div class="stat-number">7,200</div>
+          <div class="small-muted">Goal 10,000</div>
+        </div>
+        <div class="card center" id="cardDailyRing" title="Open Today">
+          <div class="progress-ring" id="dailyRing" style="--p:72%"><div style="text-align:center"><div style="font-weight:800">72%</div><div class="small-muted">Today</div></div></div>
+        </div>
+      </div>
+
+      <div class="section-title">Daily Quick Actions</div>
+      <div class="grid">
+        <div class="card" id="openHydration">💧 Hydration</div>
+        <div class="card" id="openFitness">🏃 Fitness</div>
+        <div class="card" id="openMeditation">🧘 Meditation</div>
+        <div class="card" id="openMood">😊 Mood</div>
+        <div class="card" id="openSleep">😴 Sleep</div>
+        <div class="card" id="openJournal">📝 Journal</div>
+        <div class="card" id="openFood">🍽 Food Upload</div>
+        <div class="card" id="openForum">💬 Forum</div>
+      </div>
+
+      <div style="margin-top:12px" class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-weight:800">Daily Challenge</div>
+            <div class="small-muted">Complete 30 min walk • Reward 40 pts</div>
+          </div>
+          <button class="btn" id="acceptChallenge">Accept</button>
+        </div>
+      </div>
+
+      <div style="margin-top:10px" class="card">
+        <div style="display:flex;gap:12px;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-weight:800">Mindful Quote</div>
+            <div class="small-muted">"Calmness is a superpower — practice it today."</div>
+          </div>
+          <div class="badge-chip">Quote of the day</div>
+        </div>
+      </div>
+
+      <div style="margin-top:10px; display:flex; gap:10px;">
+        <div class="card" style="flex:1" id="openAchievements">
+          <div style="font-weight:800">Achievements</div>
+          <div class="small-muted">Hydration Hero • Sleep Star</div>
+        </div>
+        <div class="card" style="width:120px" id="openReports">
+          <div style="font-weight:800">Reports</div>
+          <div class="small-muted">View trends</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MOOD -->
+  <div id="mood" class="screen">
+    <div class="container">
+      <div class="section-title">Mood Tracker</div>
+      <div class="card">
+        <div class="emoji-row">
+          <div class="emoji" data-val="1">😞</div>
+          <div class="emoji" data-val="2">😐</div>
+          <div class="emoji selected" data-val="3">🙂</div>
+          <div class="emoji" data-val="4">😄</div>
+          <div class="emoji" data-val="5">🤩</div>
+        </div>
+        <div class="week-graph" id="weekGraph">
+          <div class="bar" style="height:28%"></div>
+          <div class="bar" style="height:60%"></div>
+          <div class="bar" style="height:40%"></div>
+          <div class="bar" style="height:68%"></div>
+          <div class="bar" style="height:52%"></div>
+          <div class="bar" style="height:36%"></div>
+          <div class="bar" style="height:72%"></div>
+        </div>
+      </div>
+
+      <div class="section-title">Reflection</div>
+      <div class="card">
+        <textarea placeholder="Write or speak your reflection (speech→text supported)"></textarea>
+        <div class="small">Tip: use speech mode — your voice will convert to text for journaling (mocked here).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLEEP -->
+  <div id="sleep" class="screen">
+    <div class="container">
+      <div class="section-title">Sleep Tracker</div>
+      <div class="card sleep-row">
+        <div class="circular" id="sleepCircle" style="--s:60%"><div style="text-align:center"><div style="font-weight:800">6.0h</div><div class="small-muted">of 8h</div></div></div>
+        <div style="flex:1">
+          <input type="range" min="0" max="12" step="0.25" id="sleepSlider" class="slider" value="6">
+          <div class="small-muted">Slide to set hours — circular progress updates</div>
+        </div>
+      </div>
+
+      <div class="section-title">Sleep Tips</div>
+      <div class="card">Limit screens 1 hour before bed. Keep room cool and dark.</div>
+    </div>
+  </div>
+
+  <!-- MEDITATION -->
+  <div id="meditation" class="screen">
+    <div class="container">
+      <div class="section-title">Meditations & Breathing</div>
+      <div class="card">
+        <div style="font-weight:800">5-Min Guided Calm</div>
+        <div class="small-muted">Start a short guided session • Mock audio</div>
+        <div style="margin-top:8px"><button class="btn" id="startMedit">Start</button></div>
+      </div>
+
+      <div class="section-title">Breathing Exercises</div>
+      <div class="card">Box breathing • 4-4-4 • 3 rounds</div>
+    </div>
+  </div>
+
+  <!-- JOURNAL -->
+  <div id="journal" class="screen">
+    <div class="container">
+      <div class="section-title">Mindfulness Journal</div>
+      <div class="card">
+        <textarea id="journalText" placeholder="Write your thoughts or tap the mic to speak..."></textarea>
+        <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+          <button class="btn" id="micBtn">🎙️ Speak (speech→text)</button>
+          <button class="btn ghost" id="saveJournal">Save</button>
+        </div>
+        <div class="small">Note: speech-to-text is prototyped — in final app it will convert voice to text automatically.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOD -->
+  <div id="food" class="screen">
+    <div class="container">
+      <div class="section-title">Food Upload</div>
+      <div class="card center">
+        <input type="file" id="foodFile" accept="image/*" style="display:none">
+        <button class="btn" id="uploadBtn">Upload Food Photo</button>
+        <div id="foodPreview" style="margin-top:12px"></div>
+        <div id="calEstimate" class="small-muted" style="margin-top:8px">Calories: —</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORUM -->
+  <div id="forum" class="screen">
+    <div class="container">
+      <div class="section-title">Community Forum</div>
+      <div class="post">
+        <div style="font-weight:700">How do you stay motivated?</div>
+        <div class="small-muted">Asha • 2h</div>
+        <div style="margin-top:8px">I do short daily walks and keep a gratitude journal.</div>
+      </div>
+      <div class="post">
+        <div style="font-weight:700">Favorite meditation apps?</div>
+        <div class="small-muted">Ravi • 1d</div>
+        <div style="margin-top:8px">I use guided breathing before sleep.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAMIFICATION -->
+  <div id="game" class="screen">
+    <div class="container">
+      <div class="section-title">Gamification</div>
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="badge">⭐</div>
+          <div>
+            <div style="font-weight:800">Hydration Hero</div>
+            <div class="small-muted">Streak: 5 days • 120 pts</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px" class="card">
+        <div style="font-weight:800">Leaderboard</div>
+        <div class="small-muted">Top 3 this week</div>
+        <div style="margin-top:8px">1. You — 320 pts<br>2. Aisha — 300 pts<br>3. Rohan — 280 pts</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTIFICATIONS -->
+  <div id="notif" class="screen">
+    <div class="container">
+      <div class="section-title">Notifications</div>
+      <div class="card"><div style="font-weight:700">Drink Water</div><div class="small-muted">In 10 minutes</div></div>
+      <div class="card" style="margin-top:8px"><div style="font-weight:700">Meditation Time</div><div class="small-muted">Today 6:30 PM</div></div>
+      <div class="card" style="margin-top:8px"><div style="font-weight:700">Journal Reminder</div><div class="small-muted">Evening reflection</div></div>
+    </div>
+  </div>
+
+  <!-- PROFILE -->
+  <div id="profile" class="screen">
+    <div class="container">
+      <div style="display:flex;gap:12px;align-items:center">
+        <div style="width:72px;height:72px;border-radius:18px;background:var(--g3);display:grid;place-items:center;font-weight:800;color:#071025">NK</div>
+        <div>
+          <div style="font-weight:800">Nikitha Kanala</div>
+          <div class="small-muted">Level 7 • 1,240 pts</div>
+          <div style="margin-top:8px;width:200px;background:rgba(255,255,255,0.03);border-radius:10px;padding:6px;">
+            <div style="width:62%;height:10px;background:linear-gradient(90deg,#7c5cff,#22d3ee);border-radius:8px"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">Personal Reports</div>
+      <div class="card">Weekly mood & sleep report • Trends • Export</div>
+
+      <div class="section-title">Settings</div>
+      <div class="card">Profile • Notifications • Privacy</div>
+    </div>
+  </div>
+
+  <!-- Bottom navigation -->
+  <div class="bottom-nav">
+    <div class="nav-item active" data-target="home">🏠<div style="font-size:11px">Home</div></div>
+    <div class="nav-item" data-target="game">🏆<div style="font-size:11px">Gamify</div></div>
+    <div class="nav-item" data-target="notif">🔔<div style="font-size:11px">Notifs</div></div>
+    <div class="nav-item" data-target="profile">👤<div style="font-size:11px">Profile</div></div>
+  </div>
+</div>
+
+<!-- Modal container -->
+<div id="modalBack" class="modal-back" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div id="modalContent">
+      <!-- filled dynamically -->
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end">
+      <button class="btn ghost" id="closeModal">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Navigation and clickable cards
+const navItems = document.querySelectorAll('.nav-item');
+const screens = document.querySelectorAll('.screen');
+navItems.forEach(it=>it.addEventListener('click',()=>{
+  document.querySelector('.nav-item.active').classList.remove('active');
+  it.classList.add('active');
+  const t = it.dataset.target;
+  screens.forEach(s=>s.classList.toggle('active', s.id===t));
+}));
+
+// card click mappings to screens or modal content
+const mappings = {
+  openHydration: {screen:'home', modal: {title:'Hydration', body:'Track water intake • Quick log • Mocked for demo.'}},
+  openFitness: {screen:'home', modal: {title:'Fitness', body:'Fitness activities, steps, and quick workouts.'}},
+  openMeditation: {screen:'meditation'},
+  openMood: {screen:'mood'},
+  openSleep: {screen:'sleep'},
+  openJournal: {screen:'journal'},
+  openFood: {screen:'food'},
+  openForum: {screen:'forum'},
+  cardSteps: {screen:'home', modal:{title:'Steps Detail', body:'Today 7,200 steps • Goal 10,000 • Mock trends.'}},
+  cardDailyRing: {screen:'home', modal:{title:'Today Overview', body:'72% of daily goal completed • Keep going!'}},
+  openAchievements: {screen:'game'},
+  openReports: {screen:'profile'},
+  acceptChallenge: {modal:{title:'Challenge Accepted', body:'Great! 30-min walk added to your challenges. +40 pts when complete.'}}
+};
+Object.keys(mappings).forEach(id => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('click', () => {
+    const m = mappings[id];
+
+    // Switch to screen if defined
+    if (m.screen) {
+      screens.forEach(s => s.classList.toggle('active', s.id === m.screen));
+    }
+
+    // Only update nav if this screen has a nav button
+    if (m.screen) {
+      const navTarget = document.querySelector(`.nav-item[data-target="${m.screen}"]`);
+      if (navTarget) {
+        const activeNav = document.querySelector('.nav-item.active');
+        if (activeNav) activeNav.classList.remove('active');
+        navTarget.classList.add('active');
+      }
+    }
+
+    // Show modal if defined
+    if (m.modal) openModal(m.modal.title, m.modal.body);
+  });
+});
+
+
+// modal handling
+const modalBack = document.getElementById('modalBack');
+const modalContent = document.getElementById('modalContent');
+document.getElementById('closeModal').addEventListener('click', closeModal);
+modalBack.addEventListener('click', (e)=>{ if(e.target===modalBack) closeModal(); });
+function openModal(title, body){
+  modalContent.innerHTML = `<div style="font-weight:800;font-size:1.06rem">${title}</div><div class="small-muted" style="margin-top:8px">${body}</div>`;
+  modalBack.style.display='flex';
+  modalBack.setAttribute('aria-hidden','false');
+}
+function closeModal(){ modalBack.style.display='none'; modalBack.setAttribute('aria-hidden','true'); }
+
+// mood selection
+document.querySelectorAll('.emoji').forEach(e=>e.addEventListener('click',()=>{
+  document.querySelectorAll('.emoji').forEach(x=>x.classList.remove('selected'));
+  e.classList.add('selected');
+}));
+
+// sleep slider -> circular
+const sleepSlider = document.getElementById('sleepSlider');
+const sleepCircle = document.getElementById('sleepCircle');
+if(sleepSlider){
+  sleepSlider.addEventListener('input',()=>{
+    const val = Number(sleepSlider.value);
+    const pct = Math.min(100, Math.round((val/8)*100));
+    sleepCircle.style.setProperty('--s', pct+'%');
+    sleepCircle.querySelector('div').innerHTML = `<div style="font-weight:800">${val.toFixed(1)}h</div><div class="small-muted">of 8h</div>`;
+  });
+}
+
+// food upload mock
+const uploadBtn = document.getElementById('uploadBtn');
+const foodFile = document.getElementById('foodFile');
+const foodPreview = document.getElementById('foodPreview');
+const calEstimate = document.getElementById('calEstimate');
+if(uploadBtn){
+  uploadBtn.addEventListener('click',()=>foodFile.click());
+  foodFile.addEventListener('change',async(e)=>{
+    const f = e.target.files[0];
+    if(!f) return;
+    const url = URL.createObjectURL(f);
+    foodPreview.innerHTML = `<img src='${url}' style='max-width:160px;border-radius:10px;display:block;margin:6px auto'>`;
+    const fake = 200 + Math.min(800, Math.round(f.size/3000));
+    calEstimate.textContent = `Calories (estimate): ${fake} kcal`;
+  });
+}
+
+// journal speech mock
+const micBtn = document.getElementById('micBtn');
+const journalText = document.getElementById('journalText');
+if(micBtn){
+  micBtn.addEventListener('click',()=>{
+    // Mock: insert a sample transcribed sentence
+    journalText.value += (journalText.value?'\n':'') + "Spoken note: Feeling calm and grateful today. (speech→text mock)";
+    micBtn.textContent = '🎤 Added';
+    setTimeout(()=> micBtn.textContent = '🎙️ Speak (speech→text)', 1200);
+  });
+}
+const saveJournal = document.getElementById('saveJournal');
+if(saveJournal){
+  saveJournal.addEventListener('click', ()=> {
+    openModal('Journal Saved','Your entry was saved to your personal reports (mock).');
+  });
+}
+
+// accept challenge
+const acceptChallenge = document.getElementById('acceptChallenge');
+if(acceptChallenge) acceptChallenge.addEventListener('click', ()=> {
+  openModal('Challenge Accepted', 'Good job! The 30-min walk challenge has been added to your dashboard.');
+});
+
+// meditation start mock
+const startMedit = document.getElementById('startMedit');
+if(startMedit) startMedit.addEventListener('click', ()=> {
+  openModal('Guided Meditation', 'Playing 5-minute guided calm (mock audio). Close to stop.');
+});
+
+// download snapshot (press D)
+function downloadHTML(){
+  const blob = new Blob([document.documentElement.outerHTML],{type:'text/html'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download='healthhub_snapshot.html'; document.body.appendChild(a); a.click(); a.remove();
+}
+document.addEventListener('keydown', e=>{
+  if(e.key==='d' || e.key==='D') downloadHTML();
+  if(e.key==='1') document.querySelector('.nav-item[data-target="home"]').click();
+  if(e.key==='2') document.querySelector('.nav-item[data-target="game"]').click();
+  if(e.key==='3') document.querySelector('.nav-item[data-target="notif"]').click();
+  if(e.key==='4') document.querySelector('.nav-item[data-target="profile"]').click();
+});
+
+// small animation: reveal bars
+document.addEventListener('DOMContentLoaded', ()=>{
+  const bars = document.querySelectorAll('.bar');
+  bars.forEach((b,i)=> setTimeout(()=> b.style.height = b.style.height, i*80));
+});
+</script>
+</body>
+</html>
